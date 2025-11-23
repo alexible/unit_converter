@@ -1,6 +1,6 @@
 const CACHE_NAME = 'unit-converter-v1';
 const urlsToCache = [
-  './unit-converter.html',
+  './index.html',
   './manifest.json'
 ];
 
