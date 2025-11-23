@@ -2,7 +2,7 @@
   "name": "Unit Converter - US & European",
   "short_name": "Unit Converter",
   "description": "Convert between US and European units instantly",
-  "start_url": "./unit-converter.html",
+  "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "background_color": "#667eea",
@@ -41,14 +41,14 @@
       "name": "Weight Converter",
       "short_name": "Weight",
       "description": "Convert weight units",
-      "url": "./unit-converter.html#weight",
+      "url": "./index.html#weight",
       "icons": [{"src": "icon-192.png", "sizes": "192x192"}]
     },
     {
       "name": "Temperature Converter",
       "short_name": "Temp",
       "description": "Convert temperature units",
-      "url": "./unit-converter.html#temperature",
+      "url": "./index.html#temperature",
       "icons": [{"src": "icon-192.png", "sizes": "192x192"}]
     }
   ]
