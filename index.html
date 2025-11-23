@@ -1,0 +1,954 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#667eea">
+    <meta name="description" content="Convert between US and European units instantly">
+    <title>Unit Converter</title>
+
+    <!-- PWA Meta Tags -->
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+    <link rel="apple-touch-icon" href="icon-192.png">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Unit Converter">
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            max-width: 700px;
+            width: 100%;
+            padding: 30px;
+            margin: 20px 0;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            color: #6c757d;
+            font-size: 0.9em;
+        }
+
+        .category-tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .tab-button {
+            padding: 10px 20px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+        }
+
+        .tab-button:hover {
+            background: #f0f2ff;
+        }
+
+        .tab-button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .category-section {
+            display: none;
+        }
+
+        .category-section.active {
+            display: block;
+        }
+
+        .converter-group {
+            margin-bottom: 25px;
+            padding: 20px;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border: 2px solid #e9ecef;
+            transition: all 0.3s ease;
+        }
+
+        .converter-group:hover {
+            border-color: #667eea;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        .converter-label {
+            display: block;
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 10px;
+            font-size: 0.95em;
+        }
+
+        .input-group {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .input-wrapper {
+            flex: 1;
+            min-width: 150px;
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #dee2e6;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .arrow {
+            font-size: 24px;
+            color: #667eea;
+            font-weight: bold;
+        }
+
+        .result {
+            padding: 12px 15px;
+            background: #e7f3ff;
+            border: 2px solid #b3d9ff;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            color: #004085;
+            min-height: 48px;
+            display: flex;
+            align-items: center;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .install-prompt {
+            background: #d4edda;
+            border: 2px solid #c3e6cb;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .install-prompt.show {
+            display: block;
+        }
+
+        .install-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .install-button:hover {
+            background: #218838;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 2px solid #e9ecef;
+            color: #6c757d;
+            font-size: 0.85em;
+        }
+
+        @media print {
+            body {
+                background: white;
+            }
+
+            .container {
+                box-shadow: none;
+            }
+
+            .install-prompt {
+                display: none;
+            }
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .converter-group {
+                padding: 15px;
+            }
+
+            .input-group {
+                flex-direction: column;
+            }
+
+            .arrow {
+                transform: rotate(90deg);
+            }
+
+            .input-wrapper,
+            .result {
+                width: 100%;
+            }
+
+            .tab-button {
+                font-size: 0.85em;
+                padding: 8px 15px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Unit Converter</h1>
+            <p class="subtitle">US ↔ European Units</p>
+        </div>
+
+        <div id="installPrompt" class="install-prompt">
+            <strong>Install App</strong>
+            <p>Add this converter to your home screen for quick access!</p>
+            <button id="installButton" class="install-button">Install</button>
+        </div>
+
+        <div class="category-tabs">
+            <button class="tab-button active" onclick="showCategory('weight')">Weight</button>
+            <button class="tab-button" onclick="showCategory('length')">Length</button>
+            <button class="tab-button" onclick="showCategory('temperature')">Temperature</button>
+            <button class="tab-button" onclick="showCategory('volume')">Volume</button>
+            <button class="tab-button" onclick="showCategory('cooking')">Cooking</button>
+            <button class="tab-button" onclick="showCategory('speed')">Speed</button>
+        </div>
+
+        <!-- Weight Section -->
+        <div id="weight-section" class="category-section active">
+            <div class="converter-group">
+                <label class="converter-label">Pounds ↔ Kilograms</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="pounds" placeholder="Pounds" step="0.01" oninput="convertPoundsToKg()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="kg-result">0 kg</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="kg" placeholder="Kilograms" step="0.01" oninput="convertKgToPounds()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="pounds-result">0 lbs</div>
+                </div>
+            </div>
+
+            <div class="converter-group">
+                <label class="converter-label">Ounces ↔ Grams</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="ounces" placeholder="Ounces" step="0.01"
+                            oninput="convertOuncesToGrams()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="grams-result">0 g</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="grams" placeholder="Grams" step="0.01"
+                            oninput="convertGramsToOunces()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="ounces-result">0 oz</div>
+                </div>
+            </div>
+
+            <div class="converter-group">
+                <label class="converter-label">Tons (US) ↔ Metric Tonnes</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="tons" placeholder="Tons" step="0.01"
+                            oninput="convertTonsToMetricTonnes()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="metric-tonnes-result">0 t</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="metric-tonnes" placeholder="Metric Tonnes" step="0.01"
+                            oninput="convertMetricTonnesToTons()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="tons-result">0 tons</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Length Section -->
+        <div id="length-section" class="category-section">
+            <div class="converter-group">
+                <label class="converter-label">Inches ↔ Centimeters</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="inches" placeholder="Inches" step="0.01" oninput="convertInchesToCm()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="cm-result">0 cm</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="cm" placeholder="Centimeters" step="0.01"
+                            oninput="convertCmToInches()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="inches-result">0 in</div>
+                </div>
+            </div>
+
+            <div class="converter-group">
+                <label class="converter-label">Feet ↔ Meters</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="feet" placeholder="Feet" step="0.01" oninput="convertFeetToMeters()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="meters-result">0 m</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="meters" placeholder="Meters" step="0.01"
+                            oninput="convertMetersToFeet()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="feet-result">0 ft</div>
+                </div>
+            </div>
+
+            <div class="converter-group">
+                <label class="converter-label">Miles ↔ Kilometers</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="miles" placeholder="Miles" step="0.01" oninput="convertMilesToKm()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="km-result">0 km</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="km" placeholder="Kilometers" step="0.01" oninput="convertKmToMiles()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="miles-result">0 mi</div>
+                </div>
+            </div>
+
+            <div class="converter-group">
+                <label class="converter-label">Yards ↔ Meters</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="yards" placeholder="Yards" step="0.01"
+                            oninput="convertYardsToMeters()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="yards-meters-result">0 m</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="yards-meters" placeholder="Meters" step="0.01"
+                            oninput="convertMetersToYards()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="meters-yards-result">0 yd</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Temperature Section -->
+        <div id="temperature-section" class="category-section">
+            <div class="converter-group">
+                <label class="converter-label">Fahrenheit ↔ Celsius</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="fahrenheit" placeholder="Fahrenheit" step="0.1"
+                            oninput="convertFahrenheitToCelsius()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="celsius-result">0 °C</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="celsius" placeholder="Celsius" step="0.1"
+                            oninput="convertCelsiusToFahrenheit()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="fahrenheit-result">0 °F</div>
+                </div>
+            </div>
+
+            <div class="converter-group">
+                <label class="converter-label">Celsius ↔ Kelvin</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="celsius-kelvin" placeholder="Celsius" step="0.1"
+                            oninput="convertCelsiusToKelvin()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="kelvin-result">273.15 K</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="kelvin" placeholder="Kelvin" step="0.1"
+                            oninput="convertKelvinToCelsius()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="kelvin-celsius-result">0 °C</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Volume Section -->
+        <div id="volume-section" class="category-section">
+            <div class="converter-group">
+                <label class="converter-label">Gallons (US) ↔ Liters</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="gallons" placeholder="Gallons" step="0.01"
+                            oninput="convertGallonsToLiters()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="gallons-liters-result">0 L</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="gallons-liters" placeholder="Liters" step="0.01"
+                            oninput="convertLitersToGallons()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="liters-gallons-result">0 gal</div>
+                </div>
+            </div>
+
+            <div class="converter-group">
+                <label class="converter-label">Quarts (US) ↔ Liters</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="quarts" placeholder="Quarts" step="0.01"
+                            oninput="convertQuartsToLiters()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="liters-result">0 L</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="liters" placeholder="Liters" step="0.01"
+                            oninput="convertLitersToQuarts()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="quarts-result">0 qt</div>
+                </div>
+            </div>
+
+            <div class="converter-group">
+                <label class="converter-label">Fluid Ounces (US) ↔ Milliliters</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="fl-oz" placeholder="Fluid Ounces" step="0.01"
+                            oninput="convertFlOzToMl()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="ml-result">0 ml</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="ml" placeholder="Milliliters" step="0.01" oninput="convertMlToFlOz()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="fl-oz-result">0 fl oz</div>
+                </div>
+            </div>
+
+            <div class="converter-group">
+                <label class="converter-label">Pints (US) ↔ Liters</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="pints" placeholder="Pints" step="0.01"
+                            oninput="convertPintsToLiters()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="pints-liters-result">0 L</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="pints-liters" placeholder="Liters" step="0.01"
+                            oninput="convertLitersToPints()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="liters-pints-result">0 pt</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Cooking Section -->
+        <div id="cooking-section" class="category-section">
+            <div class="converter-group">
+                <label class="converter-label">Cups (US) ↔ Milliliters</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="cups" placeholder="Cups" step="0.01" oninput="convertCupsToMl()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="cups-ml-result">0 ml</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="cups-ml" placeholder="Milliliters" step="0.01"
+                            oninput="convertMlToCups()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="ml-cups-result">0 cups</div>
+                </div>
+            </div>
+
+            <div class="converter-group">
+                <label class="converter-label">Tablespoons (US) ↔ Milliliters</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="tablespoons" placeholder="Tablespoons" step="0.01"
+                            oninput="convertTablespoonToMl()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="tbsp-ml-result">0 ml</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="tbsp-ml" placeholder="Milliliters" step="0.01"
+                            oninput="convertMlToTablespoon()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="ml-tbsp-result">0 tbsp</div>
+                </div>
+            </div>
+
+            <div class="converter-group">
+                <label class="converter-label">Teaspoons (US) ↔ Milliliters</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="teaspoons" placeholder="Teaspoons" step="0.01"
+                            oninput="convertTeaspoonToMl()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="tsp-ml-result">0 ml</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="tsp-ml" placeholder="Milliliters" step="0.01"
+                            oninput="convertMlToTeaspoon()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="ml-tsp-result">0 tsp</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Speed Section -->
+        <div id="speed-section" class="category-section">
+            <div class="converter-group">
+                <label class="converter-label">Miles per Hour ↔ Kilometers per Hour</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="mph" placeholder="MPH" step="0.1" oninput="convertMphToKmh()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="kmh-result">0 km/h</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="kmh" placeholder="KM/H" step="0.1" oninput="convertKmhToMph()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="mph-result">0 mph</div>
+                </div>
+            </div>
+
+            <div class="converter-group">
+                <label class="converter-label">Knots ↔ Miles per Hour</label>
+                <div class="input-group">
+                    <div class="input-wrapper">
+                        <input type="number" id="knots" placeholder="Knots" step="0.1" oninput="convertKnotsToMph()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="knots-mph-result">0 mph</div>
+                </div>
+                <div class="input-group" style="margin-top: 10px;">
+                    <div class="input-wrapper">
+                        <input type="number" id="knots-mph" placeholder="MPH" step="0.1" oninput="convertMphToKnots()">
+                    </div>
+                    <span class="arrow">⇄</span>
+                    <div class="result" id="mph-knots-result">0 knots</div>
+                </div>
+            </div>
+        </div>
+
+        <footer>
+            © 2025 Alex K
+        </footer>
+    </div>
+
+    <script>
+        // PWA Installation
+        let deferredPrompt;
+        const installPrompt = document.getElementById('installPrompt');
+        const installButton = document.getElementById('installButton');
+
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            installPrompt.classList.add('show');
+        });
+
+        installButton.addEventListener('click', async () => {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                const { outcome } = await deferredPrompt.userChoice;
+                deferredPrompt = null;
+                installPrompt.classList.remove('show');
+            }
+        });
+
+        // Category Switching
+        function showCategory(category) {
+            // Hide all sections
+            document.querySelectorAll('.category-section').forEach(section => {
+                section.classList.remove('active');
+            });
+
+            // Remove active class from all buttons
+            document.querySelectorAll('.tab-button').forEach(button => {
+                button.classList.remove('active');
+            });
+
+            // Show selected section
+            document.getElementById(category + '-section').classList.add('active');
+
+            // Add active class to clicked button
+            event.target.classList.add('active');
+        }
+
+        // Conversion constants
+        const POUNDS_TO_KG = 0.453592;
+        const OUNCES_TO_GRAMS = 28.3495;
+        const TONS_TO_METRIC_TONNES = 0.907185;
+        const INCHES_TO_CM = 2.54;
+        const FEET_TO_METERS = 0.3048;
+        const MILES_TO_KM = 1.60934;
+        const YARDS_TO_METERS = 0.9144;
+        const GALLONS_TO_LITERS = 3.78541;
+        const QUARTS_TO_LITERS = 0.946353;
+        const FL_OZ_TO_ML = 29.5735;
+        const PINTS_TO_LITERS = 0.473176;
+        const CUPS_TO_ML = 236.588;
+        const TABLESPOON_TO_ML = 14.7868;
+        const TEASPOON_TO_ML = 4.92892;
+        const MPH_TO_KMH = 1.60934;
+        const KNOTS_TO_MPH = 1.15078;
+
+        // Weight conversions
+        function convertPoundsToKg() {
+            const pounds = parseFloat(document.getElementById('pounds').value) || 0;
+            const kg = pounds * POUNDS_TO_KG;
+            document.getElementById('kg-result').textContent = kg.toFixed(4) + ' kg';
+        }
+
+        function convertKgToPounds() {
+            const kg = parseFloat(document.getElementById('kg').value) || 0;
+            const pounds = kg / POUNDS_TO_KG;
+            document.getElementById('pounds-result').textContent = pounds.toFixed(4) + ' lbs';
+        }
+
+        function convertOuncesToGrams() {
+            const ounces = parseFloat(document.getElementById('ounces').value) || 0;
+            const grams = ounces * OUNCES_TO_GRAMS;
+            document.getElementById('grams-result').textContent = grams.toFixed(4) + ' g';
+        }
+
+        function convertGramsToOunces() {
+            const grams = parseFloat(document.getElementById('grams').value) || 0;
+            const ounces = grams / OUNCES_TO_GRAMS;
+            document.getElementById('ounces-result').textContent = ounces.toFixed(4) + ' oz';
+        }
+
+        function convertTonsToMetricTonnes() {
+            const tons = parseFloat(document.getElementById('tons').value) || 0;
+            const tonnes = tons * TONS_TO_METRIC_TONNES;
+            document.getElementById('metric-tonnes-result').textContent = tonnes.toFixed(4) + ' t';
+        }
+
+        function convertMetricTonnesToTons() {
+            const tonnes = parseFloat(document.getElementById('metric-tonnes').value) || 0;
+            const tons = tonnes / TONS_TO_METRIC_TONNES;
+            document.getElementById('tons-result').textContent = tons.toFixed(4) + ' tons';
+        }
+
+        // Length conversions
+        function convertInchesToCm() {
+            const inches = parseFloat(document.getElementById('inches').value) || 0;
+            const cm = inches * INCHES_TO_CM;
+            document.getElementById('cm-result').textContent = cm.toFixed(4) + ' cm';
+        }
+
+        function convertCmToInches() {
+            const cm = parseFloat(document.getElementById('cm').value) || 0;
+            const inches = cm / INCHES_TO_CM;
+            document.getElementById('inches-result').textContent = inches.toFixed(4) + ' in';
+        }
+
+        function convertFeetToMeters() {
+            const feet = parseFloat(document.getElementById('feet').value) || 0;
+            const meters = feet * FEET_TO_METERS;
+            document.getElementById('meters-result').textContent = meters.toFixed(4) + ' m';
+        }
+
+        function convertMetersToFeet() {
+            const meters = parseFloat(document.getElementById('meters').value) || 0;
+            const feet = meters / FEET_TO_METERS;
+            document.getElementById('feet-result').textContent = feet.toFixed(4) + ' ft';
+        }
+
+        function convertMilesToKm() {
+            const miles = parseFloat(document.getElementById('miles').value) || 0;
+            const km = miles * MILES_TO_KM;
+            document.getElementById('km-result').textContent = km.toFixed(4) + ' km';
+        }
+
+        function convertKmToMiles() {
+            const km = parseFloat(document.getElementById('km').value) || 0;
+            const miles = km / MILES_TO_KM;
+            document.getElementById('miles-result').textContent = miles.toFixed(4) + ' mi';
+        }
+
+        function convertYardsToMeters() {
+            const yards = parseFloat(document.getElementById('yards').value) || 0;
+            const meters = yards * YARDS_TO_METERS;
+            document.getElementById('yards-meters-result').textContent = meters.toFixed(4) + ' m';
+        }
+
+        function convertMetersToYards() {
+            const meters = parseFloat(document.getElementById('yards-meters').value) || 0;
+            const yards = meters / YARDS_TO_METERS;
+            document.getElementById('meters-yards-result').textContent = yards.toFixed(4) + ' yd';
+        }
+
+        // Temperature conversions
+        function convertFahrenheitToCelsius() {
+            const fahrenheit = parseFloat(document.getElementById('fahrenheit').value);
+            if (isNaN(fahrenheit)) {
+                document.getElementById('celsius-result').textContent = '0 °C';
+                return;
+            }
+            const celsius = (fahrenheit - 32) * 5 / 9;
+            document.getElementById('celsius-result').textContent = celsius.toFixed(2) + ' °C';
+        }
+
+        function convertCelsiusToFahrenheit() {
+            const celsius = parseFloat(document.getElementById('celsius').value);
+            if (isNaN(celsius)) {
+                document.getElementById('fahrenheit-result').textContent = '0 °F';
+                return;
+            }
+            const fahrenheit = (celsius * 9 / 5) + 32;
+            document.getElementById('fahrenheit-result').textContent = fahrenheit.toFixed(2) + ' °F';
+        }
+
+        function convertCelsiusToKelvin() {
+            const celsius = parseFloat(document.getElementById('celsius-kelvin').value);
+            if (isNaN(celsius)) {
+                document.getElementById('kelvin-result').textContent = '273.15 K';
+                return;
+            }
+            const kelvin = celsius + 273.15;
+            document.getElementById('kelvin-result').textContent = kelvin.toFixed(2) + ' K';
+        }
+
+        function convertKelvinToCelsius() {
+            const kelvin = parseFloat(document.getElementById('kelvin').value);
+            if (isNaN(kelvin)) {
+                document.getElementById('kelvin-celsius-result').textContent = '0 °C';
+                return;
+            }
+            const celsius = kelvin - 273.15;
+            document.getElementById('kelvin-celsius-result').textContent = celsius.toFixed(2) + ' °C';
+        }
+
+        // Volume conversions
+        function convertGallonsToLiters() {
+            const gallons = parseFloat(document.getElementById('gallons').value) || 0;
+            const liters = gallons * GALLONS_TO_LITERS;
+            document.getElementById('gallons-liters-result').textContent = liters.toFixed(4) + ' L';
+        }
+
+        function convertLitersToGallons() {
+            const liters = parseFloat(document.getElementById('gallons-liters').value) || 0;
+            const gallons = liters / GALLONS_TO_LITERS;
+            document.getElementById('liters-gallons-result').textContent = gallons.toFixed(4) + ' gal';
+        }
+
+        function convertQuartsToLiters() {
+            const quarts = parseFloat(document.getElementById('quarts').value) || 0;
+            const liters = quarts * QUARTS_TO_LITERS;
+            document.getElementById('liters-result').textContent = liters.toFixed(4) + ' L';
+        }
+
+        function convertLitersToQuarts() {
+            const liters = parseFloat(document.getElementById('liters').value) || 0;
+            const quarts = liters / QUARTS_TO_LITERS;
+            document.getElementById('quarts-result').textContent = quarts.toFixed(4) + ' qt';
+        }
+
+        function convertFlOzToMl() {
+            const flOz = parseFloat(document.getElementById('fl-oz').value) || 0;
+            const ml = flOz * FL_OZ_TO_ML;
+            document.getElementById('ml-result').textContent = ml.toFixed(2) + ' ml';
+        }
+
+        function convertMlToFlOz() {
+            const ml = parseFloat(document.getElementById('ml').value) || 0;
+            const flOz = ml / FL_OZ_TO_ML;
+            document.getElementById('fl-oz-result').textContent = flOz.toFixed(2) + ' fl oz';
+        }
+
+        function convertPintsToLiters() {
+            const pints = parseFloat(document.getElementById('pints').value) || 0;
+            const liters = pints * PINTS_TO_LITERS;
+            document.getElementById('pints-liters-result').textContent = liters.toFixed(4) + ' L';
+        }
+
+        function convertLitersToPints() {
+            const liters = parseFloat(document.getElementById('pints-liters').value) || 0;
+            const pints = liters / PINTS_TO_LITERS;
+            document.getElementById('liters-pints-result').textContent = pints.toFixed(4) + ' pt';
+        }
+
+        // Cooking conversions
+        function convertCupsToMl() {
+            const cups = parseFloat(document.getElementById('cups').value) || 0;
+            const ml = cups * CUPS_TO_ML;
+            document.getElementById('cups-ml-result').textContent = ml.toFixed(2) + ' ml';
+        }
+
+        function convertMlToCups() {
+            const ml = parseFloat(document.getElementById('cups-ml').value) || 0;
+            const cups = ml / CUPS_TO_ML;
+            document.getElementById('ml-cups-result').textContent = cups.toFixed(4) + ' cups';
+        }
+
+        function convertTablespoonToMl() {
+            const tbsp = parseFloat(document.getElementById('tablespoons').value) || 0;
+            const ml = tbsp * TABLESPOON_TO_ML;
+            document.getElementById('tbsp-ml-result').textContent = ml.toFixed(2) + ' ml';
+        }
+
+        function convertMlToTablespoon() {
+            const ml = parseFloat(document.getElementById('tbsp-ml').value) || 0;
+            const tbsp = ml / TABLESPOON_TO_ML;
+            document.getElementById('ml-tbsp-result').textContent = tbsp.toFixed(2) + ' tbsp';
+        }
+
+        function convertTeaspoonToMl() {
+            const tsp = parseFloat(document.getElementById('teaspoons').value) || 0;
+            const ml = tsp * TEASPOON_TO_ML;
+            document.getElementById('tsp-ml-result').textContent = ml.toFixed(2) + ' ml';
+        }
+
+        function convertMlToTeaspoon() {
+            const ml = parseFloat(document.getElementById('tsp-ml').value) || 0;
+            const tsp = ml / TEASPOON_TO_ML;
+            document.getElementById('ml-tsp-result').textContent = tsp.toFixed(2) + ' tsp';
+        }
+
+        // Speed conversions
+        function convertMphToKmh() {
+            const mph = parseFloat(document.getElementById('mph').value) || 0;
+            const kmh = mph * MPH_TO_KMH;
+            document.getElementById('kmh-result').textContent = kmh.toFixed(2) + ' km/h';
+        }
+
+        function convertKmhToMph() {
+            const kmh = parseFloat(document.getElementById('kmh').value) || 0;
+            const mph = kmh / MPH_TO_KMH;
+            document.getElementById('mph-result').textContent = mph.toFixed(2) + ' mph';
+        }
+
+        function convertKnotsToMph() {
+            const knots = parseFloat(document.getElementById('knots').value) || 0;
+            const mph = knots * KNOTS_TO_MPH;
+            document.getElementById('knots-mph-result').textContent = mph.toFixed(2) + ' mph';
+        }
+
+        function convertMphToKnots() {
+            const mph = parseFloat(document.getElementById('knots-mph').value) || 0;
+            const knots = mph / KNOTS_TO_MPH;
+            document.getElementById('mph-knots-result').textContent = knots.toFixed(2) + ' knots';
+        }
+
+        // Register Service Worker for PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('service-worker.js')
+                    .then(registration => console.log('ServiceWorker registered'))
+                    .catch(err => console.log('ServiceWorker registration failed'));
+            });
+        }
+    </script>
+</body>
+
+</html>
